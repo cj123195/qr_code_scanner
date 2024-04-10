@@ -23,15 +23,15 @@ class WebQrView extends StatefulWidget {
   final PermissionSetCallback? onPermissionSet;
   final CameraFacing? cameraFacing;
 
-  const WebQrView(
-      {Key? key,
-      required this.onPlatformViewCreated,
-      this.onPermissionSet,
-      this.cameraFacing = CameraFacing.front})
-      : super(key: key);
+  const WebQrView({
+    super.key,
+    required this.onPlatformViewCreated,
+    this.onPermissionSet,
+    this.cameraFacing = CameraFacing.front,
+  });
 
   @override
-  _WebQrViewState createState() => _WebQrViewState();
+  State<WebQrView> createState() => _WebQrViewState();
 
   static html.DivElement vidDiv =
       html.DivElement(); // need a global for the registerViewFactory
@@ -53,18 +53,19 @@ class WebQrView extends StatefulWidget {
 
 class _WebQrViewState extends State<WebQrView> {
   html.MediaStream? _localStream;
+
   // html.CanvasElement canvas;
   // html.CanvasRenderingContext2D ctx;
   bool _currentlyProcessing = false;
 
-  QRViewControllerWeb? _controller;
+  _QRViewControllerWeb? _controller;
 
   late Size _size = const Size(0, 0);
   Timer? timer;
   String? code;
   String? _errorMsg;
   html.VideoElement video = html.VideoElement();
-  String viewID = 'QRVIEW-' + DateTime.now().millisecondsSinceEpoch.toString();
+  String viewID = 'QRVIEW-${DateTime.now().millisecondsSinceEpoch}';
 
   final StreamController<Barcode> _scanUpdateController =
       StreamController<Barcode>();
@@ -130,7 +131,7 @@ class _WebQrViewState extends State<WebQrView> {
       //     await html.window.navigator.mediaDevices.getUserMedia(constraints);
       // straight JS:
       if (_controller == null) {
-        _controller = QRViewControllerWeb(this);
+        _controller = _QRViewControllerWeb(this);
         widget.onPlatformViewCreated(_controller!);
       }
       var stream = await promiseToFuture(getUserMedia(constraints));
@@ -253,10 +254,11 @@ class _WebQrViewState extends State<WebQrView> {
   }
 }
 
-class QRViewControllerWeb implements QRViewController {
+class _QRViewControllerWeb implements QRViewController {
   final _WebQrViewState _state;
 
-  QRViewControllerWeb(this._state);
+  _QRViewControllerWeb(this._state);
+
   @override
   void dispose() => _state.cancel();
 
